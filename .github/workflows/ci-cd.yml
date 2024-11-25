@@ -66,15 +66,15 @@ jobs:
           echo "TASKS=$TASKS"
           echo "tasks=$TASKS" >> $GITHUB_ENV
 
-      - name: Stop Running Tasks
-        if: env.tasks
-        run: |
-          for TASK in $tasks; do
-            echo "Stopping task $TASK..."
-            aws ecs stop-task \
-              --cluster ${{ secrets.AWS_CLUSTER_NAME }} \
-              --task $TASK
-          done
+          - name: Stop Running Tasks
+            if: env.tasks
+            run: |
+              for TASK in $tasks; do
+                echo "Stopping task $TASK..."
+                aws ecs stop-task \
+                  --cluster ${{ secrets.AWS_CLUSTER_NAME }} \
+                  --task $TASK
+              done
 
       - name: Restart ECS Service
         run: |
