@@ -2,6 +2,7 @@ name: Docker Image CI
 
 on:
   push:
+    branches: [ "main" ]
     tags:
       - 'v*'
 
@@ -30,8 +31,7 @@ jobs:
 
       - name: Tag Docker image with version
         run: |
-          VERSION=${GITHUB_REF##*/}
-          docker tag noahh99/hermes:latest naohh99/hermes:${{ env.VERSION }}
+          docker tag noahh99/hermes:latest noahh99/hermes:${{ env.VERSION }}
 
       - name: Push Docker images
         run: |
