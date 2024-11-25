@@ -55,6 +55,27 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: List Running Tasks
+        id: list-tasks
+        run: |
+          TASKS=$(aws ecs list-tasks \
+          --cluster ${{ secrets.AWS_CLUSTER_NAME }} \
+          --service-name ${{ secrets.AWS_SERVICE_NAME }} \
+          --query "taskArns[]" \
+          --output text)
+          echo "TASKS=$TASKS"
+          echo "tasks=$TASKS" >> $GITHUB_ENV
+
+          - name: Stop Running Tasks
+            if: env.tasks
+            run: |
+              for TASK in $tasks; do
+                echo "Stopping task $TASK..."
+                aws ecs stop-task \
+                  --cluster ${{ secrets.AWS_CLUSTER_NAME }} \
+                  --task $TASK
+              done
+
       - name: Restart ECS Service
         run: |
           aws ecs update-service \

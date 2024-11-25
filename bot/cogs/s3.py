@@ -70,7 +70,7 @@ class UploadToS3(commands.Cog):
             # activity_text = f"{total_files} files ({humanized_size})"
             #
             # await self.bot.change_presence(activity=CustomActivity(f"Managing {activity_text}"))
-            await self.bot.change_presence(activity=CustomActivity(f"Running version 0.1.3"))
+            await self.bot.change_presence(activity=CustomActivity(f"Running version 0.1.4"))
 
             # logger.info(f"Updated presence to: {activity_text}")
         except Exception as e:
