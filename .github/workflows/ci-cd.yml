@@ -23,7 +23,12 @@ jobs:
       - name: Extract version from tag
         id: get-version
         run: |
-          VERSION=${GITHUB_REF##*/}
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF##*/}
+          else
+            echo "This workflow requires a valid tag (e.g., v0.1.0) to run."
+            exit 1
+          fi
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Build Docker image
