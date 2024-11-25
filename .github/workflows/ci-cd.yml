@@ -20,6 +20,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract version
+        id: get-version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF##*/}
+            echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          else
+            echo "This workflow only supports versioned tags (e.g., v1.0.0)."
+            exit 1
+          fi
+
       - name: Build Docker image
         run: docker build -t noahh99/hermes:latest .
 
