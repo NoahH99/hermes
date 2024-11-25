@@ -1,0 +1,19 @@
+---
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hermes
+    restart: always
+    environment:
+      BOT_TOKEN: xxxxxxxxxxxxxxxxxxxxx
+      COMMAND_PREFIX: !
+      BOT_ADMINISTRATORS: 000000000000000000
+      S3_BUCKET_NAME: xxxxxxxxxxxxxxxxxxxxx
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: xxxxxxxxxxxxxxxxxxxxx
+      AWS_SECRET_ACCESS_KEY: xxxxxxxxxxxxxxxxxxxxx
+      WATCHED_CHANNELS: 000000000000000000:000000000000000000
+      CDN_DOMAIN: xxxxxxxxxxxxxxxxxxxxx
