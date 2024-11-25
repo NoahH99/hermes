@@ -5,8 +5,6 @@ When it detects attachments, Hermes automatically uploads them to a configured A
 The bot's configuration is fully customizable using environment variables, making it easy to deploy and adapt for
 various use cases.
 
----
-
 ## Features
 
 - **Channel Monitoring**: Observes specified Discord channels for messages.
@@ -66,14 +64,10 @@ To run Hermes locally without Docker:
     python bot/bot.py
     ```
 
----
-
 ## Contributing
 
 Contributions to the Hermes are welcome! If you find any issues or have suggestions for improvements, please
 open an issue or submit a pull request.
-
----
 
 ## License
 
