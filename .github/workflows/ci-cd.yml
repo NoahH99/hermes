@@ -42,3 +42,22 @@ jobs:
         run: |
           docker push noahh99/hermes:latest
           docker push noahh99/hermes:${{ env.VERSION }}
+
+  redeploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Force ECS Service Redeployment
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          cluster: ${{ secrets.AWS_CLUSTER_NAME }}
+          service: ${{ secrets.AWS_SERVICE_NAME }}
+          force-new-deployment: true
+

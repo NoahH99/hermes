@@ -65,13 +65,14 @@ class UploadToS3(commands.Cog):
         and the total size of files in the S3 bucket.
         """
         try:
-            total_files, total_size = self.calculate_bucket_stats()
-            humanized_size = humanize.naturalsize(total_size, binary=True)
-            activity_text = f"{total_files} files ({humanized_size})"
+            # total_files, total_size = self.calculate_bucket_stats()
+            # humanized_size = humanize.naturalsize(total_size, binary=True)
+            # activity_text = f"{total_files} files ({humanized_size})"
+            #
+            # await self.bot.change_presence(activity=CustomActivity(f"Managing {activity_text}"))
+            await self.bot.change_presence(activity=CustomActivity(f"Running version 0.1.1"))
 
-            await self.bot.change_presence(activity=CustomActivity(f"Managing {activity_text}"))
-
-            logger.info(f"Updated presence to: {activity_text}")
+            # logger.info(f"Updated presence to: {activity_text}")
         except Exception as e:
             logger.error(f"Failed to update presence: {e}")
 
