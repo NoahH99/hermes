@@ -27,3 +27,8 @@ jobs:
         run: |
           VERSION=${GITHUB_REF##*/}
           docker tag noahh99/hermes:latest naohh99/hermes:${VERSION}
+
+      - name: Push Docker images
+        run: |
+          docker push noahh99/hermes:latest
+          docker push noahh99/hermes:${VERSION}
