@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -6,14 +7,15 @@ logger = logging.getLogger("config")
 
 class Config:
     def __init__(self):
-        self.bot_token = self._get_env("BOT_TOKEN", required=True)
+        self.version = self._get_version()
+
+        secrets = json.loads(self._get_env("SECRETS", required=True))
+        self.s3_bucket_name = secrets.get("S3_BUCKET_NAME")
+        self.bot_token = secrets.get("BOT_TOKEN")
+
         self.command_prefix = self._get_env("COMMAND_PREFIX", default="!")
         self.bot_administrators = self._parse_admin_ids(self._get_env("BOT_ADMINISTRATORS", default=""))
-
-        self.s3_bucket_name = self._get_env("S3_BUCKET_NAME", required=True)
         self.s3_region = self._get_env("AWS_REGION", "us-east-1")
-        self.aws_access_key_id = self._get_env("AWS_ACCESS_KEY_ID", required=True)
-        self.aws_secret_access_key = self._get_env("AWS_SECRET_ACCESS_KEY", required=True)
 
         raw_watched_channels = self._get_env("WATCHED_CHANNELS", default="")
         self.watched_channels = self._parse_watched_channels(raw_watched_channels)
@@ -70,6 +72,15 @@ class Config:
             )
 
         return guild_channels
+
+    def _get_version(self):
+        version_file = "version.txt"
+
+        if os.path.exists(version_file):
+            with open(version_file, "r") as version_file:
+                return version_file.read().strip()
+
+        return "unknown"
 
     def validate(self):
         """

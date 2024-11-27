@@ -6,10 +6,9 @@ from typing import Optional, Dict, List, Tuple
 
 import boto3
 import humanize
+from config import Config
 from discord import Message, Attachment, CustomActivity
 from discord.ext import commands
-
-from config import Config
 
 logger = logging.getLogger("s3.cog")
 
@@ -32,12 +31,7 @@ class UploadToS3(commands.Cog):
         self.config = config
         self.cdn_domain = self.config.cdn_domain
 
-        self.s3_client = boto3.client(
-            "s3",
-            region_name=self.config.s3_region,
-            aws_access_key_id=self.config.aws_access_key_id,
-            aws_secret_access_key=self.config.aws_secret_access_key,
-        )
+        self.s3_client = boto3.client("s3", region_name=self.config.s3_region)
 
     def calculate_bucket_stats(self) -> Tuple[int, int]:
         """
@@ -67,9 +61,10 @@ class UploadToS3(commands.Cog):
         try:
             total_files, total_size = self.calculate_bucket_stats()
             humanized_size = humanize.naturalsize(total_size, binary=True)
-            activity_text = f"{total_files} files ({humanized_size})"
+            humanized_files = humanize.intcomma(total_files)
+            activity_text = f"{humanized_files} files ({humanized_size})"
 
-            await self.bot.change_presence(activity=CustomActivity(f"Managing {activity_text} | v1.0.0-beta"))
+            await self.bot.change_presence(activity=CustomActivity(f"Managing {activity_text} | {self.config.version}"))
 
             logger.info(f"Updated presence to: {activity_text}")
         except Exception as e:
@@ -98,18 +93,22 @@ class UploadToS3(commands.Cog):
                 and channel_id in self.config.watched_channels[guild_id]
         )
 
-    async def process_attachments(self, attachments: List[Attachment], channel):
+    async def process_attachments(self, attachments: List[Attachment], status_message: Message):
         """
         Process and upload attachments to S3, and notify the user of the outcome.
         """
-        for attachment in attachments:
+        channel = status_message.channel
+        number_of_attachments = len(attachments)
+
+        for i, attachment in enumerate(attachments, 1):
+            current_file = f"(`{i}/{number_of_attachments}`)"
             public_url = await self.upload_to_s3(attachment)
 
             try:
                 if public_url:
-                    await channel.send(f"File uploaded successfully: {public_url}")
+                    await channel.send(f"File {current_file} uploaded successfully: {public_url}")
             except Exception as e:
-                await channel.send(f"File upload failed: {str(e)}")
+                await channel.send(f"File {current_file} upload failed: {str(e)}")
                 logger.error(f"Failed to upload {attachment.filename} to S3: {str(e)}", exc_info=True)
 
     @commands.Cog.listener()
@@ -120,8 +119,11 @@ class UploadToS3(commands.Cog):
         if message.author.bot:
             return
 
+        channel = message.channel
         guild_id = message.guild.id if message.guild else None
-        channel_id = message.channel.id if message.channel else None
+        channel_id = message.channel.id if channel else None
+        attachments = message.attachments
+        number_of_attachments = len(attachments)
 
         if not guild_id or not channel_id:
             logger.debug("Message ignored (no guild/channel context).")
@@ -131,8 +133,13 @@ class UploadToS3(commands.Cog):
             logger.debug("Message ignored (not in monitored guild/channel).")
             return
 
-        logger.info(f"Processing message from guild {guild_id}, channel {channel_id}.")
-        await self.process_attachments(message.attachments, message.channel)
+        if number_of_attachments <= 0:
+            logger.debug("Message ignored (no attachments).")
+            return
+
+        status_message = await channel.send(f"Processing {number_of_attachments} attachment(s)...")
+        logger.info(f"Processing message from guild {guild_id}, channel {channel_id} with {number_of_attachments} attachments.")
+        await self.process_attachments(attachments, status_message)
         asyncio.create_task(self.delayed_update_presence())
 
     def determine_file_type(self, file_extension: str) -> str:
