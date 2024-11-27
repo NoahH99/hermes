@@ -73,8 +73,9 @@ class Config:
 
         return guild_channels
 
-    def _get_version(self):
-        version_file = "version.txt"
+    @staticmethod
+    def _get_version():
+        version_file = "./version.txt"
 
         if os.path.exists(version_file):
             with open(version_file, "r") as version_file:
