@@ -75,7 +75,7 @@ class Config:
 
     @staticmethod
     def _get_version():
-        version_file = "./version.txt"
+        version_file = os.path.join(os.path.dirname(__file__), "version.txt")
 
         if os.path.exists(version_file):
             with open(version_file, "r") as version_file:
